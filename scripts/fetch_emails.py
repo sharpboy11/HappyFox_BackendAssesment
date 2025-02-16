@@ -12,19 +12,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 # Gmail API and Database credentials
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-CREDENTIALS_FILE = r"C:\ProjectFeb\BHARU ASSIGNMENT\BHARU ASSIGNMENT\HappyFox\HappyFox\config\credentials.json"
+CREDENTIALS_FILE = os.path.join("config", "credentials.json")  # Relative path
 
 def authenticate_gmail():
     """Authenticate with Gmail API and return the service."""
     logging.info("Authenticating with Gmail API...")
-    flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
-    creds = flow.run_local_server(port=0)
-    logging.info("Authentication successful.")
-    return build('gmail', 'v1', credentials=creds)
+    
+    try:
+        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+        creds = flow.run_local_server(port=0)
+        logging.info("✅ Authentication successful.")
+        return build('gmail', 'v1', credentials=creds)
+    except Exception as e:
+        logging.error(f"❌ Authentication failed: {e}")
+        exit(1)
 
 def connect_db():
     """Establish connection with MySQL database using PyMySQL."""
     logging.info("Connecting to MySQL database...")
+    
     try:
         conn = pymysql.connect(
             host="localhost",
@@ -34,10 +40,10 @@ def connect_db():
             charset="utf8mb4",
             cursorclass=pymysql.cursors.DictCursor
         )
-        logging.info("Connected to MySQL database successfully.")
+        logging.info("✅ Connected to MySQL database successfully.")
         return conn
     except pymysql.MySQLError as err:
-        logging.error(f"Database connection failed: {err}")
+        logging.error(f"❌ Database connection failed: {err}")
         exit(1)
 
 def fetch_emails():
@@ -48,10 +54,10 @@ def fetch_emails():
     try:
         results = service.users().messages().list(userId='me', maxResults=10).execute()
         messages = results.get('messages', [])
-        logging.info(f"Total emails fetched: {len(messages)}")
+        logging.info(f"📩 Total emails fetched: {len(messages)}")
 
         if not messages:
-            logging.warning("No emails found.")
+            logging.warning("⚠️ No emails found.")
             return
         
         conn = connect_db()
@@ -78,12 +84,13 @@ def fetch_emails():
                     break
             email_data["message"] = email_body or "No Content"
 
-            # *Print fetched email before inserting into DB*
+            # Log fetched email details before inserting into DB
             logging.info(f"Fetched Email -> Subject: {email_data['subject']}, "
                          f"From: {email_data['sender']}, To: {email_data['recipient']}, "
-                         f"Received Date: {email_data['received_datetime']}\nMessage: {email_data['message'][:200]}...\n")
+                         f"Received Date: {email_data['received_datetime']}\n"
+                         f"Message: {email_data['message'][:200]}...\n")
 
-            # Insert email data into MySQL (ID is auto-incremented)
+            # Insert email data into MySQL
             cursor.execute("""
                 INSERT INTO emails (sender, recipient, subject, message, received_datetime, is_read) 
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -93,10 +100,10 @@ def fetch_emails():
 
         conn.commit()
         conn.close()
-        logging.info("Emails stored in MySQL database successfully.")
+        logging.info("✅ Emails stored in MySQL database successfully.")
 
     except Exception as e:
-        logging.error(f"Error fetching emails: {e}")
+        logging.error(f"❌ Error fetching emails: {e}")
 
 if __name__ == "__main__":
     fetch_emails()

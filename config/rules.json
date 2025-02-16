@@ -1,0 +1,89 @@
+{
+    "rules": [
+      {
+        "description": "Rule 1: Sender is Internshala",
+        "conditions": [
+          {
+            "field": "From",
+            "predicate": "contains",
+            "value": "internshala"
+          }
+        ],
+        "actions": [
+          {
+            "action": "move",
+            "folder": "internships"
+          }
+        ],
+        "predicate": "All"
+      },
+      {
+        "description": "Rule 2: Sender is NPTEL",
+        "conditions": [
+          {
+            "field": "From",
+            "predicate": "contains",
+            "value": "onlinecourse"
+          }
+        ],
+        "actions": [
+          {
+            "action": "move",
+            "folder": "course"
+          }
+        ],
+        "predicate": "Any"
+      },
+      {
+        "description": "Rule 3: Sender is Lions",
+        "conditions": [
+          {
+            "field": "From",
+            "predicate": "contains",
+            "value": "lionsclub"
+          }
+        ],
+        "actions": [
+          {
+            "action": "move",
+            "folder": "club"
+          }
+        ],
+        "predicate": "All"
+      },
+      {
+        "description": "Rule 4: Subject contains 'post'",
+        "conditions": [
+          {
+            "field": "Subject",
+            "predicate": "contains",
+            "value": "post"
+          }
+        ],
+        "actions": [
+          {
+            "action": "move",
+            "folder": "linkedin"
+          }
+        ],
+        "predicate": "All"
+      },
+      {
+        "description": "Rule 5: Date is today",
+        "conditions": [
+          {
+            "field": "Received Date",
+            "predicate": "equals",
+            "value": "today"
+          }
+        ],
+        "actions": [
+          {
+            "action": "move",
+            "folder": "today"
+          }
+        ],
+        "predicate": "All"
+      }
+    ]
+  }
